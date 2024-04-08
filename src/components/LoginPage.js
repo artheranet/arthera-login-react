@@ -1,11 +1,10 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   GithubLoginButton,
-  GoogleLoginButton,
   MicrosoftLoginButton,
   TwitterLoginButton,
 } from 'react-social-login-buttons';
-import {LoginSocialGithub, LoginSocialGoogle, LoginSocialMicrosoft,} from 'reactjs-social-login';
+import {LoginSocialGithub, LoginSocialMicrosoft,} from 'reactjs-social-login';
 
 import LoginSocialTwitter from '../components/LoginSocialTwitter';
 import User from './User';
@@ -13,6 +12,8 @@ import axios from 'axios';
 import {useLocation} from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import LoginService from '../services/LoginService';
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { decodeJwt } from 'jose';
 
 const LoginPage = () => {
   const location = useLocation();
@@ -21,13 +22,13 @@ const LoginPage = () => {
   const loginService = new LoginService(); // Instantiate LoginService
 
   const onLoginStart = useCallback(() => {
-    alert('login start');
+    // alert('login start');
   }, []);
 
   const onLogoutSuccess = useCallback(() => {
     setProfile(null);
     setProvider('');
-    alert('logout success');
+    // alert('logout success');
   }, []);
 
   // Existing useEffect for setting redirectUrl and logoUrl
@@ -39,32 +40,6 @@ const LoginPage = () => {
       setProfile(userData);
     }
   }, [location.state]);
-
-  const fetchGoogleUserInfo = async (accessToken) => {
-    try {
-      const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      // Assuming the response contains the user info
-      if (response.data) {
-        await loginService.loginWithGoogle(accessToken, response.data.sub); // Call loginWithGoogle from LoginService
-        const walletaddress = await loginService.getAddress();
-        console.log('response.data: ', response.data);
-        // Here you can set the profile with the data you need
-        // For example, if you want to store the name and email:
-        setProfile({
-          name: response.data.name,
-          email: response.data.email,
-          walletaddress: walletaddress
-        });
-        setProvider('google'); // Or dynamically based on the provider
-      }
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-    }
-  };
 
   // Generate the code_verifier and code_challenge
   const generateCodeVerifierAndChallenge = () => {
@@ -100,22 +75,28 @@ const LoginPage = () => {
           <div className='card' style={{ width: 'fit-content' }}>
             {/* Your existing LoginPage layout and logic here */}
 
-            <LoginSocialGoogle
-              isOnlyGetToken
-              client_id={process.env.REACT_APP_GG_APP_ID || ''}
-              onLoginStart={onLoginStart}
-              onResolve={async ({ provider, data }) => {
-                console.log('provider: ', provider, 'data: ', data);
-                if (data.access_token) {
-                  await fetchGoogleUserInfo(data.access_token);
-                }
-              }}
-              onReject={(err) => {
-                console.log(err);
-              }}
-            >
-              <GoogleLoginButton />
-            </LoginSocialGoogle>
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GG_APP_ID || ''}>
+              <GoogleLogin
+                onSuccess={async(response) => {
+                  if (response.credential) {
+                    const decoded = decodeJwt(response.credential);
+                    await loginService.loginWithGoogle(response.credential,decoded.sub); // Call loginWithGoogle from LoginService
+                    const walletaddress = await loginService.getAddress();
+                    // Here you can set the profile with the data you need
+                    // For example, if you want to store the name and email:
+                    setProfile({
+                      name: decoded.name,
+                      email: response.email,
+                      walletaddress
+                    });
+                    setProvider('google'); // Or dynamically based on the provider
+                  }
+                }}
+                onError={() => {
+                  console.log('Login Failed');
+                }}
+              />
+            </GoogleOAuthProvider>
 
             {<LoginSocialMicrosoft
               isOnlyGetToken

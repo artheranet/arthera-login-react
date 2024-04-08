@@ -38,8 +38,6 @@ const AuthPage = () => {
 
   // Function to handle Microsoft token exchange
   const handleMicrosoftLogin = async (code) => {
-console.log("code:", code);
-console.log("storedCodeVerifier:", storedCodeVerifier);
       const data = qs.stringify({
         client_id: process.env.REACT_APP_MICROSOFT_APP_ID,
         scope: 'User.Read',
@@ -93,7 +91,7 @@ console.log("storedCodeVerifier:", storedCodeVerifier);
       return null;
     }
   };
-  
+
   const handleTwitterLogin = async (code) => {
     try {
       console.log("code:", code);
@@ -137,7 +135,7 @@ console.log("storedCodeVerifier:", storedCodeVerifier);
         // Navigate to the login page with the updated user data
         navigate('/login', { state: { userData } });
       }
-  
+
   };
 
   return (
