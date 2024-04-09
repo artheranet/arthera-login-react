@@ -1,6 +1,7 @@
-import { environment } from "./environment";
+// update this accordingly
+export const CHAIN_ID = 10243;
 
-export const CHAIN_ID = environment.chainId;
+export const MPC_AUTH_ENDPOINT = 'https://mpc-auth-test.arthera.net';
 
 export const ARTHERA_NETWORK_DETAILS = {
   10242: {
