@@ -1,122 +1,9 @@
 import React, { useCallback, useState } from 'react';
 
-const ABI = [
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint8",
-        "name": "version",
-        "type": "uint8"
-      }
-    ],
-    "name": "Initialized",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "increment",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "isOwner",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-];
-
 import Web3 from 'web3';
 
 import { ARTHERA_NETWORK_DETAILS, ARTHERA_TESTNET_ID } from '@artherachain/mpc-sdk';
+import { SIMPLE_CONTRACT_ABI, SIMPLE_CONTRACT_ADDRESS } from '../constants';
 
 const User = ({ provider, profile, onLogout, sdk }) => {
   const [txReceipt, setTxReceipt] = useState(null);
@@ -135,13 +22,13 @@ const User = ({ provider, profile, onLogout, sdk }) => {
 
   const onSendTxWeb3 = useCallback(async () => {
     const web3 = new Web3(ARTHERA_NETWORK_DETAILS[10243].rpcUrls[0]);
-    const contract = new web3.eth.Contract(ABI, "0xcF9366a34BBB2166b0FA61461f898428fA4926ac");
+    const contract = new web3.eth.Contract(SIMPLE_CONTRACT_ABI, SIMPLE_CONTRACT_ADDRESS);
     const tx_data = contract.methods.increment().encodeABI();
     const nonce = await web3.eth.getTransactionCount(profile.wallet);
 
     const rawTx = {
       from: profile.wallet,
-      to: '0xcF9366a34BBB2166b0FA61461f898428fA4926ac',
+      to: SIMPLE_CONTRACT_ADDRESS,
       nonce: '0x'+web3.utils.toBN(nonce).toString('hex'),
       gasLimit: '0x2DC6C0',
       gasPrice: '0x3d1ac2e0',
