@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import User from './User';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import { decodeJwt } from 'jose';
-import { ArtheraLogin } from '@artherachain/mpc-sdk';
+import { ARTHERA_TESTNET_ID, ArtheraLogin } from '@artherachain/mpc-sdk';
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 
@@ -10,7 +10,7 @@ const LoginPage = () => {
   const [socialProvider, setSocialProvider] = useState('');
   const [profile, setProfile] = useState(null);
   const [txReceipt, setTxReceipt] = useState(null);
-  const [sdk, setSdk] = useState(new ArtheraLogin(10243));
+  const [sdk, _] = useState(new ArtheraLogin(ARTHERA_TESTNET_ID));
 
   const onLogoutSuccess = useCallback(() => {
     setProfile(null);
@@ -43,12 +43,12 @@ const LoginPage = () => {
               <GoogleLogin
                 onSuccess={async(response) => {
                   if (response.credential) {
-                    const decoded = decodeJwt(response.credential);
-                    await sdk.loginWithGoogleToken(googleClientId, decoded.sub, response.credential);
+                    await sdk.loginWithGoogleToken(googleClientId, response.credential);
                     const wallet = sdk.getWallet();
+                    const decodedToken = decodeJwt(response.credential);
                     setProfile({
-                      name: decoded.name,
-                      email: decoded.email,
+                      name: decodedToken.name,
+                      email: decodedToken.email,
                       wallet
                     });
                     setSocialProvider('google');
