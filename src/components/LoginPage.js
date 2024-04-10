@@ -9,7 +9,6 @@ const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 const LoginPage = () => {
   const [socialProvider, setSocialProvider] = useState('');
   const [profile, setProfile] = useState(null);
-  const [txReceipt, setTxReceipt] = useState(null);
   const [sdk, _] = useState(new ArtheraLogin(ARTHERA_TESTNET_ID));
 
   const onLogoutSuccess = useCallback(() => {
@@ -19,22 +18,10 @@ const LoginPage = () => {
     // alert('logout success');
   }, []);
 
-  const onSendTx = useCallback(async () => {
-    try {
-      const receipt = await sdk.getSigner().sendTransaction({
-        to: sdk.getWallet(),
-        value: "100000000000000000"
-      });
-      setTxReceipt(receipt);
-    } catch (e) {
-      alert(e);
-    }
-  });
-
   return (
     <>
       {socialProvider && profile ? (
-        <User provider={socialProvider} profile={profile} onLogout={onLogoutSuccess} onSendTx={onSendTx} txReceipt={txReceipt}/>
+        <User provider={socialProvider} profile={profile} onLogout={onLogoutSuccess} sdk={sdk}/>
       ) : (
         <div style={{display: "flex", justifyContent: "center", alignItems: "center", height: "100vh"}}>
           <div style={{ width: 'fit-content' }}>
